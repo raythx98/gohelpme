@@ -1,6 +1,6 @@
 package reqctx
 
-const Key = ""
+const Key = "ReqCtx"
 
 type Value struct {
 	RequestId string
