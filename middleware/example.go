@@ -3,9 +3,9 @@ package middleware
 import "net/http"
 
 func Example(next http.Handler) http.Handler {
-	// We wrap our anonymous function, and cast it to a http.HandlerFunc
+	// We wrap our anonymous function, and cast it to a httpbuilder.HandlerFunc
 	// Because our function signature matches ServeHTTP(w, r), this allows
-	// our function (type) to implicitly satisfy the http.Handler interface.
+	// our function (type) to implicitly satisfy the httpbuilder.Handler interface.
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			// Logic before - reading request values, putting things into the

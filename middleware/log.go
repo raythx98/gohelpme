@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/raythx98/gohelpme/builder/httprequest"
 	"github.com/raythx98/gohelpme/util/reqctx"
 	"github.com/raythx98/gohelpme/util/slogger"
 )
@@ -31,8 +32,8 @@ func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			ctx := slogger.AppendCtx(r.Context(), slog.String("request id", r.Header.Get(requestIdHeaderKey)))
-			ctx = context.WithValue(ctx, reqctx.Key, reqctx.Value{RequestId: r.Header.Get(requestIdHeaderKey)})
+			ctx := slogger.AppendCtx(r.Context(), slog.String("request id", r.Header.Get(string(httprequest.RequestId))))
+			ctx = context.WithValue(ctx, reqctx.Key, reqctx.Value{RequestId: r.Header.Get(string(httprequest.RequestId))})
 
 			requestBody, _ := io.ReadAll(r.Body)
 			r.Body = io.NopCloser(bytes.NewBuffer(requestBody))
