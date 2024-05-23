@@ -12,8 +12,10 @@ type Implementor struct {
 	httpClient *http.Client
 }
 
-func NewUserClient() *Implementor {
-	httpClient := &http.Client{}
+func New() *Implementor {
+	httpClient := &http.Client{
+		Transport: &LogRoundTripper{},
+	}
 	return &Implementor{httpClient: httpClient}
 }
 

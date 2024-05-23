@@ -4,6 +4,8 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
+	"github.com/raythx98/gohelpme/util/reqctx"
 )
 
 func Init() {
@@ -30,6 +32,10 @@ func (h ContextHandler) Handle(ctx context.Context, r slog.Record) error {
 		}
 	}
 
+	if reqCtx := reqctx.GetValue(ctx); reqCtx != nil {
+		r.AddAttrs(slog.Any("context", reqctx.GetValue(ctx)))
+	}
+
 	return h.Handler.Handle(ctx, r)
 }
 
@@ -48,4 +54,11 @@ func AppendCtx(parent context.Context, attr slog.Attr) context.Context {
 	v := make([]slog.Attr, 0)
 	v = append(v, attr)
 	return context.WithValue(parent, slogFields, v)
+}
+
+func GetLogLevel(err error) slog.Level {
+	if err != nil {
+		return slog.LevelError
+	}
+	return slog.LevelInfo
 }

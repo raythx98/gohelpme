@@ -7,9 +7,11 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/raythx98/gohelpme/builder/httprequest"
+	"github.com/raythx98/gohelpme/util/httphelper"
 	"github.com/raythx98/gohelpme/util/reqctx"
 	"github.com/raythx98/gohelpme/util/slogger"
 )
@@ -20,7 +22,8 @@ func init() {
 
 type responseBodyWriter struct {
 	http.ResponseWriter
-	body []byte
+	body       []byte
+	statusCode int
 }
 
 func (w *responseBodyWriter) Write(body []byte) (int, error) {
@@ -28,28 +31,50 @@ func (w *responseBodyWriter) Write(body []byte) (int, error) {
 	return w.ResponseWriter.Write(body)
 }
 
+func (w *responseBodyWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+	w.ResponseWriter.WriteHeader(statusCode)
+}
+
 func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
-			start := time.Now()
-			ctx := slogger.AppendCtx(r.Context(), slog.String("request id", r.Header.Get(string(httprequest.RequestId))))
-			ctx = context.WithValue(ctx, reqctx.Key, reqctx.Value{RequestId: r.Header.Get(string(httprequest.RequestId))})
+			startAt := time.Now()
+			ctx := context.WithValue(r.Context(), reqctx.Key, reqctx.New(r.Header.Get(string(httprequest.RequestId)), nil))
+			r = r.WithContext(ctx)
 
+			// capture request body
 			requestBody, _ := io.ReadAll(r.Body)
 			r.Body = io.NopCloser(bytes.NewBuffer(requestBody))
-			bodyWriter := responseBodyWriter{w, make([]byte, 0)}
 
-			next.ServeHTTP(&bodyWriter, r.WithContext(ctx))
+			// capture response body
+			respWriter := responseBodyWriter{w, make([]byte, 0), http.StatusOK}
+
+			next.ServeHTTP(&respWriter, r)
 
 			slog.LogAttrs(
-				ctx, slog.LevelInfo, "request",
-				slog.String("endpoint", fmt.Sprintf("%s %s%s %s", r.Method, r.Host, r.RequestURI, r.Proto)),
+				ctx, slog.LevelInfo, "incoming http execution",
+				slog.String("hostname", getHostname()),
 				slog.String("remote address", r.RemoteAddr),
-				slog.Any("headers", r.Header),
-				slog.String("body", string(requestBody)),
-				slog.String("time taken", time.Since(start).String()),
-				slog.String("response body", string(bodyWriter.body)),
+				slog.String("time taken", time.Since(startAt).String()),
+				slog.Group("request",
+					slog.Time("started at", startAt.Truncate(time.Second)),
+					slog.String("endpoint", fmt.Sprintf("%s %s://%s%s %s",
+						r.Method, httphelper.GetScheme(r), r.Host, r.RequestURI, r.Proto)),
+					slog.Any("headers", r.Header),
+					slog.String("body", string(requestBody)),
+				),
+				slog.Group("response",
+					slog.Time("completed at", time.Now().Truncate(time.Second)),
+					slog.Int("status code", respWriter.statusCode),
+					slog.String("body", string(respWriter.body)),
+				),
 			)
 		},
 	)
+}
+
+func getHostname() string {
+	hostname, _ := os.Hostname()
+	return hostname
 }

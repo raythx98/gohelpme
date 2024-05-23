@@ -9,11 +9,11 @@ import (
 )
 
 type Builder interface {
-	New(ctx context.Context, method string, url string) *Implementor
+	New(ctx context.Context, method Method, url string) *Implementor
 	WithBody(body any) *Implementor
 	WithAuth(auth string) *Implementor
 	WithHeaders(headers map[string]string) *Implementor
-	Builder() (*http.Request, error)
+	Build() (*http.Request, error)
 }
 
 type Implementor struct {
