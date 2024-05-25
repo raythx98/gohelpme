@@ -4,21 +4,18 @@ import (
 	"net/http"
 )
 
-type Client interface {
-	Do() (*http.Response, error)
-}
-
-type Implementor struct {
+type Client struct {
 	httpClient *http.Client
 }
 
-func New() *Implementor {
+func New() *Client {
+	// TODO: should this accept an ILogger interface?
 	httpClient := &http.Client{
 		Transport: &LogRoundTripper{},
 	}
-	return &Implementor{httpClient: httpClient}
+	return &Client{httpClient: httpClient}
 }
 
-func (i *Implementor) Do(req *http.Request) (*http.Response, error) {
+func (i *Client) Do(req *http.Request) (*http.Response, error) {
 	return i.httpClient.Do(req)
 }

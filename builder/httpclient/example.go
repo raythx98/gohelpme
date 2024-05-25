@@ -6,7 +6,7 @@ import (
 
 type Example struct{}
 
-func (t Example) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *Example) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Do work before the request is sent
 
 	resp, err := http.DefaultTransport.RoundTrip(req)

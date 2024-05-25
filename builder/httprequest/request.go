@@ -8,25 +8,17 @@ import (
 	"net/http"
 )
 
-type Builder interface {
-	New(ctx context.Context, method Method, url string) *Implementor
-	WithBody(body any) *Implementor
-	WithAuth(auth string) *Implementor
-	WithHeaders(headers map[string]string) *Implementor
-	Build() (*http.Request, error)
-}
-
-type Implementor struct {
+type Builder struct {
 	HttpRequest *http.Request
 	Error       error
 }
 
-func (i *Implementor) New(ctx context.Context, method Method, url string) *Implementor {
+func (i *Builder) New(ctx context.Context, method Method, url string) *Builder {
 	i.HttpRequest, i.Error = http.NewRequestWithContext(ctx, string(method), url, nil)
 	return i
 }
 
-func (i *Implementor) WithBody(body any) *Implementor {
+func (i *Builder) WithBody(body any) *Builder {
 	if i.Error != nil || body == nil {
 		return i
 	}
@@ -43,7 +35,7 @@ func (i *Implementor) WithBody(body any) *Implementor {
 	return i
 }
 
-func (i *Implementor) WithAuth(auth string) *Implementor {
+func (i *Builder) WithAuth(auth string) *Builder {
 	if i.Error != nil {
 		return i
 	}
@@ -51,7 +43,7 @@ func (i *Implementor) WithAuth(auth string) *Implementor {
 	return i
 }
 
-func (i *Implementor) WithHeaders(headers map[string]string) *Implementor {
+func (i *Builder) WithHeaders(headers map[string]string) *Builder {
 	if i.Error != nil {
 		return i
 	}
@@ -61,6 +53,6 @@ func (i *Implementor) WithHeaders(headers map[string]string) *Implementor {
 	return i
 }
 
-func (i *Implementor) Build() (*http.Request, error) {
+func (i *Builder) Build() (*http.Request, error) {
 	return i.HttpRequest, i.Error
 }

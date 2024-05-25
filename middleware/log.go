@@ -40,7 +40,7 @@ func Log(next http.Handler) http.Handler {
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			startAt := time.Now()
-			ctx := context.WithValue(r.Context(), reqctx.Key, reqctx.New(r.Header.Get(string(httprequest.RequestId)), nil))
+			ctx := context.WithValue(r.Context(), reqctx.Key, reqctx.New(r.Header.Get(string(httprequest.RequestId))))
 			r = r.WithContext(ctx)
 
 			// capture request body

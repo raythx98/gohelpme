@@ -16,7 +16,7 @@ func init() {
 
 type LogRoundTripper struct{}
 
-func (t LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	startAt := time.Now()
 	reqLogGroup := t.createRequestLogGroup(req, startAt)
 
@@ -32,7 +32,7 @@ func (t LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
-func (t LogRoundTripper) createRequestLogGroup(req *http.Request, startAt time.Time) slog.Attr {
+func (t *LogRoundTripper) createRequestLogGroup(req *http.Request, startAt time.Time) slog.Attr {
 	return slog.Group("request",
 		slog.String("endpoint", fmt.Sprintf("%s %s", req.Method, req.URL.String())),
 		slog.Any("headers", req.Header),
@@ -41,7 +41,7 @@ func (t LogRoundTripper) createRequestLogGroup(req *http.Request, startAt time.T
 	)
 }
 
-func (t LogRoundTripper) createResponseLogGroup(resp *http.Response) slog.Attr {
+func (t *LogRoundTripper) createResponseLogGroup(resp *http.Response) slog.Attr {
 	if resp == nil {
 		return slog.Attr{}
 	}

@@ -11,11 +11,15 @@ type Value struct {
 	UserId    *int64 `json:"Userid,omitempty"`
 }
 
-func New(requestId string, userId *int64) *Value {
-	return &Value{
-		RequestId: requestId,
-		UserId:    userId,
+func (v *Value) SetUserId(userId int64) {
+	if v == nil {
+		return
 	}
+	v.UserId = &userId
+}
+
+func New(requestId string) *Value {
+	return &Value{RequestId: requestId}
 }
 
 func GetValue(ctx context.Context) *Value {
