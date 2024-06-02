@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/raythx98/gohelpme/builder/httprequest"
-	"github.com/raythx98/gohelpme/util/httphelper"
-	"github.com/raythx98/gohelpme/util/reqctx"
-	"github.com/raythx98/gohelpme/util/slogger"
+	"github.com/raythx98/gohelpme/tool/httphelper"
+	"github.com/raythx98/gohelpme/tool/reqctx"
+	"github.com/raythx98/gohelpme/tool/slogger"
 )
 
 func init() {
