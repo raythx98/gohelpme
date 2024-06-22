@@ -45,7 +45,7 @@ func GetRequestBodyAndValidate[T any](_ context.Context, r *http.Request, v *val
 		return body, fmt.Errorf("failed to unmarshal request body: %w", err)
 	}
 	if err := v.Struct(body); err != nil {
-		return body, err // return as-is to keep the original error type
+		return body, fmt.Errorf("validation failed: %w", err)
 	}
 
 	return body, nil
