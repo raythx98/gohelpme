@@ -2,6 +2,7 @@ package middleware
 
 import "net/http"
 
+// Example is a simple example of how middleware can be used to wrap the request handling logic.
 func Example(next http.Handler) http.Handler {
 	// We wrap our anonymous function, and cast it to a httpbuilder.HandlerFunc
 	// Because our function signature matches ServeHTTP(w, r), this allows
