@@ -6,6 +6,8 @@ import (
 
 //go:generate mockery --name ILogger
 type ILogger interface {
+	// GetInstance returns the underlying logger instance.
+	GetInstance() interface{}
 	// Debug logs a message at DebugLevel.
 	Debug(ctx context.Context, msg string, fields ...Field)
 	// Info logs a message at InfoLevel.

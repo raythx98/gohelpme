@@ -29,6 +29,10 @@ func NewDefault() *Default {
 	return defaultLogger
 }
 
+func (d *Default) GetInstance() interface{} {
+	return slog.Default()
+}
+
 func (d *Default) Debug(ctx context.Context, msg string, options ...Field) {
 	slog.Debug(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), getMapFromFields(options...))
 }
