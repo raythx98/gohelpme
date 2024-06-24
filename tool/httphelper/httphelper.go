@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// GetScheme returns the scheme of the request.
 func GetScheme(req *http.Request) any {
 	if req.TLS == nil {
 		return "http"
@@ -17,6 +18,9 @@ func GetScheme(req *http.Request) any {
 	return "https"
 }
 
+// CopyRequestBody copies the request body and returns it as a string.
+//
+// It also sets the request body back to its original state.
 func CopyRequestBody(req *http.Request) string {
 	requestBody := make([]byte, 0)
 	if req.Body != nil {
@@ -26,6 +30,9 @@ func CopyRequestBody(req *http.Request) string {
 	return string(requestBody)
 }
 
+// CopyResponseBody copies the response body and returns it as a string.
+//
+// It also sets the response body back to its original state.
 func CopyResponseBody(resp *http.Response) string {
 	responseBody := make([]byte, 0)
 	if resp.Body != nil {
@@ -35,6 +42,9 @@ func CopyResponseBody(resp *http.Response) string {
 	return string(responseBody)
 }
 
+// GetRequestBodyAndValidate reads the request body and validates it.
+//
+// It returns the request body and an error if any.
 func GetRequestBodyAndValidate[T any](_ context.Context, r *http.Request, v *validator.Validate) (T, error) {
 	var body T
 	requestByte, err := io.ReadAll(r.Body)
