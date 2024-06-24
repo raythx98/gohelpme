@@ -2,54 +2,70 @@ package httpclient
 
 import (
 	"fmt"
-	"log/slog"
+	"github.com/raythx98/gohelpme/tool/logger"
 	"net/http"
 	"time"
 
 	"github.com/raythx98/gohelpme/tool/httphelper"
-	"github.com/raythx98/gohelpme/tool/slogger"
 )
 
-func init() {
-	slogger.Init()
+// LogRoundTripper is an http.RoundTripper that logs requests and responses.
+type LogRoundTripper struct {
+	log logger.ILogger
 }
 
-type LogRoundTripper struct{}
+// NewLogRoundTripper creates a new LogRoundTripper.
+func NewLogRoundTripper(log logger.ILogger) *LogRoundTripper {
+	return &LogRoundTripper{log: log}
+}
 
+// RoundTrip executes a single HTTP transaction, returning a Response for the provided Request.
 func (t *LogRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	startAt := time.Now()
 	reqLogGroup := t.createRequestLogGroup(req, startAt)
 
 	resp, err := http.DefaultTransport.RoundTrip(req)
 
-	slog.LogAttrs(
-		req.Context(), slogger.GetLogLevel(err), "outgoing http execution",
-		slog.String("time taken", time.Since(startAt).String()),
-		reqLogGroup,
-		t.createResponseLogGroup(resp),
+	message := fmt.Sprintf("[out-http] %s %s in %s", req.Method, req.URL.String(), time.Since(startAt).String())
+	message += formatMessageSuffix(resp, err)
+
+	t.log.Info(req.Context(), message,
+		logger.WithField("request", reqLogGroup),
+		logger.WithField("response", t.createResponseLogGroup(resp)),
 	)
 
 	return resp, err
 }
 
-func (t *LogRoundTripper) createRequestLogGroup(req *http.Request, startAt time.Time) slog.Attr {
-	return slog.Group("request",
-		slog.String("endpoint", fmt.Sprintf("%s %s", req.Method, req.URL.String())),
-		slog.Any("headers", req.Header),
-		slog.String("body", httphelper.CopyRequestBody(req)),
-		slog.Time("started at", startAt.Truncate(time.Second)),
-	)
+func formatMessageSuffix(resp *http.Response, err error) string {
+	if err != nil {
+		return fmt.Sprintf(": error: %s", err.Error())
+	}
+	if resp == nil {
+		return ": error, nil response"
+	}
+	return fmt.Sprintf(": %d", resp.StatusCode)
 }
 
-func (t *LogRoundTripper) createResponseLogGroup(resp *http.Response) slog.Attr {
+func (t *LogRoundTripper) createRequestLogGroup(req *http.Request, startAt time.Time) map[string]interface{} {
+	return map[string]interface{}{
+		"endpoint":   fmt.Sprintf("%s %s", req.Method, req.URL.String()),
+		"method":     req.Method,
+		"headers":    req.Header,
+		"body":       httphelper.CopyRequestBody(req),
+		"started at": startAt.Truncate(time.Second),
+	}
+}
+
+func (t *LogRoundTripper) createResponseLogGroup(resp *http.Response) map[string]interface{} {
 	if resp == nil {
-		return slog.Attr{}
+		return nil
 	}
 
-	return slog.Group("response",
-		slog.Time("completed at", time.Now().Truncate(time.Second)),
-		slog.Int("status code", resp.StatusCode),
-		slog.String("status", resp.Status),
-		slog.Any("response body", httphelper.CopyResponseBody(resp)),
-	)
+	return map[string]interface{}{
+		"status code":  resp.StatusCode,
+		"status":       resp.Status,
+		"body":         httphelper.CopyResponseBody(resp),
+		"completed at": time.Now().Truncate(time.Second),
+	}
 }
