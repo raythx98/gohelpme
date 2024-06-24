@@ -5,15 +5,11 @@ package logger
 // The function is expected to return a map where each key-value pair represents a field to be logged.
 type Field func() map[string]interface{}
 
-// EmptyField returns an empty map.
 func EmptyField() map[string]interface{} {
 	return make(map[string]interface{})
 }
 
-// GetMapFromFields returns a map from the variadic Field.
-//
-// It merges all the maps returned by the Field functions into a single map.
-func GetMapFromFields(fields ...Field) map[string]interface{} {
+func getMapFromFields(fields ...Field) map[string]interface{} {
 	m := make(map[string]interface{})
 	for _, o := range fields {
 		for k, v := range o() {

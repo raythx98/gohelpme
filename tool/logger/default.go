@@ -34,29 +34,29 @@ func (d *Default) GetInstance() interface{} {
 }
 
 func (d *Default) Debug(ctx context.Context, msg string, options ...Field) {
-	slog.Debug(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), GetMapFromFields(options...))
+	slog.Debug(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), getMapFromFields(options...))
 }
 
 func (d *Default) Info(ctx context.Context, msg string, options ...Field) {
-	slog.Info(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), GetMapFromFields(options...))
+	slog.Info(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), getMapFromFields(options...))
 }
 
 func (d *Default) Warn(ctx context.Context, msg string, options ...Field) {
-	slog.Warn(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), GetMapFromFields(options...))
+	slog.Warn(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), getMapFromFields(options...))
 }
 
 func (d *Default) Error(ctx context.Context, msg string, options ...Field) {
-	slog.Error(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), GetMapFromFields(options...))
+	slog.Error(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), getMapFromFields(options...))
 }
 
 func (d *Default) Fatal(ctx context.Context, msg string, options ...Field) {
-	slog.Error(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), GetMapFromFields(options...))
+	slog.Error(msg, fmt.Sprintf("%+v", reqctx.GetValue(ctx)), getMapFromFields(options...))
 	// TODO: Should we exit here?
 	os.Exit(1)
 }
 
 func (d *Default) Panic(ctx context.Context, msg string, options ...Field) {
-	slog.Error(fmt.Sprintf("%+v", reqctx.GetValue(ctx)), msg, GetMapFromFields(options...))
+	slog.Error(fmt.Sprintf("%+v", reqctx.GetValue(ctx)), msg, getMapFromFields(options...))
 	// TODO: Should we exit here?
 	os.Exit(1)
 }
