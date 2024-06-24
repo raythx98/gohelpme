@@ -33,7 +33,7 @@ func WithError(err error) Field {
 }
 
 // WithField creates an option that contains the key-value pair.
-func WithField(key string, value ...interface{}) Field {
+func WithField(key string, value interface{}) Field {
 	return func() map[string]interface{} {
 		return map[string]interface{}{
 			key: value,
