@@ -13,11 +13,13 @@ type Builder struct {
 	Error       error
 }
 
+// New creates a new http request with the given method and url.
 func (i *Builder) New(ctx context.Context, method Method, url string) *Builder {
-	i.HttpRequest, i.Error = http.NewRequestWithContext(ctx, string(method), url, nil)
-	return i
+	req, err := http.NewRequestWithContext(ctx, string(method), url, nil)
+	return &Builder{HttpRequest: req, Error: err}
 }
 
+// WithBody sets the request body.
 func (i *Builder) WithBody(body any) *Builder {
 	if i.Error != nil || body == nil {
 		return i
@@ -35,6 +37,7 @@ func (i *Builder) WithBody(body any) *Builder {
 	return i
 }
 
+// WithAuth sets the request `Authorization` header .
 func (i *Builder) WithAuth(auth string) *Builder {
 	if i.Error != nil {
 		return i
@@ -43,6 +46,7 @@ func (i *Builder) WithAuth(auth string) *Builder {
 	return i
 }
 
+// WithHeaders sets the request headers.
 func (i *Builder) WithHeaders(headers map[string]string) *Builder {
 	if i.Error != nil {
 		return i
@@ -53,6 +57,7 @@ func (i *Builder) WithHeaders(headers map[string]string) *Builder {
 	return i
 }
 
+// Build returns the http request and error.
 func (i *Builder) Build() (*http.Request, error) {
 	return i.HttpRequest, i.Error
 }
