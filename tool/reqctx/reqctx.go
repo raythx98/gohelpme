@@ -2,6 +2,7 @@ package reqctx
 
 import (
 	"context"
+	"encoding/json"
 )
 
 // Key is used when writing to context using context.WithValue(parent, Key, Value).
@@ -12,8 +13,27 @@ var Key = "ReqCtx"
 // Uninitialized fields will not be logged due to json tag `json:"omitempty"`.
 type Value struct {
 	RequestId      string
-	UserId         *int64  `json:"Userid,omitempty"`
+	UserId         *int64  `json:"userId,omitempty"`
 	IdempotencyKey *string `json:"idempotencyKey,omitempty"`
+	Error          error   `json:"error,omitempty"`
+	ErrorStack     string  `json:"errorStack,omitempty"`
+}
+
+// MarshalJSON customizes the JSON marshaling for the Value struct.
+func (v *Value) MarshalJSON() ([]byte, error) {
+	type Alias Value // Create an alias to avoid recursion
+	return json.Marshal(&struct {
+		*Alias
+		Error string `json:"error,omitempty"`
+	}{
+		Alias: (*Alias)(v),
+		Error: func() string {
+			if v.Error != nil {
+				return v.Error.Error()
+			}
+			return ""
+		}(),
+	})
 }
 
 // New initializes *Value with a required requestId.
@@ -42,6 +62,22 @@ func (v *Value) SetIdempotencyKey(idemKey string) {
 		return
 	}
 	v.IdempotencyKey = &idemKey
+}
+
+// SetError modifies Error of Value in place.
+func (v *Value) SetError(error error) {
+	if v == nil {
+		return
+	}
+	v.Error = error
+}
+
+// SetErrorStack modifies ErrorStack of Value in place.
+func (v *Value) SetErrorStack(errorStack []byte) {
+	if v == nil {
+		return
+	}
+	v.ErrorStack = string(errorStack)
 }
 
 // GetValue retrieves a pointer to Value.

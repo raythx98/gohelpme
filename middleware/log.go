@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/raythx98/gohelpme/tool/logger"
 	"io"
 	"net/http"
 	"os"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/raythx98/gohelpme/builder/httprequest"
 	"github.com/raythx98/gohelpme/tool/httphelper"
+	"github.com/raythx98/gohelpme/tool/logger"
 	"github.com/raythx98/gohelpme/tool/reqctx"
 )
 
@@ -60,23 +60,33 @@ func Log(log logger.ILogger) func(next http.Handler) http.Handler {
 
 				timeTaken := time.Since(startAt).String()
 
-				log.Info(ctx, fmt.Sprintf("[in-http] %s %s%s %d in %s",
-					r.Method, r.Host, r.RequestURI, respWriter.statusCode, timeTaken),
-					logger.WithField("hostname", getHostname()),
-					logger.WithField("remote address", r.RemoteAddr),
-					logger.WithField("request", map[string]interface{}{
+				logs := map[string]interface{}{
+					"hostname":       getHostname(),
+					"remote address": r.RemoteAddr,
+					"request": map[string]interface{}{
 						"started at": startAt.Truncate(time.Second),
 						"endpoint":   fmt.Sprintf("%s %s://%s%s %s", r.Method, httphelper.GetScheme(r), r.Host, r.RequestURI, r.Proto),
 						"headers":    r.Header,
 						"body":       string(requestBody),
-					}),
-					logger.WithField("response", map[string]interface{}{
+					},
+					"response": map[string]interface{}{
 						"completed at": time.Now().Truncate(time.Second),
 						"status code":  respWriter.statusCode,
 						"body":         string(respWriter.body),
-					}),
-				)
+					},
+				}
 
+				if reqctx.GetValue(r.Context()).Error != nil {
+					log.Error(r.Context(), fmt.Sprintf("[in-http] %s %s%s %d in %s",
+						r.Method, r.Host, r.RequestURI, respWriter.statusCode, timeTaken),
+						logger.WithFields(logs),
+					)
+				} else {
+					log.Info(r.Context(), fmt.Sprintf("[in-http] %s %s%s %d in %s",
+						r.Method, r.Host, r.RequestURI, respWriter.statusCode, timeTaken),
+						logger.WithFields(logs),
+					)
+				}
 			},
 		)
 	}

@@ -1,9 +1,12 @@
 package middleware
 
 import (
-	"github.com/raythx98/gohelpme/tool/logger"
+	"fmt"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/raythx98/gohelpme/tool/logger"
+	"github.com/raythx98/gohelpme/tool/reqctx"
 )
 
 // Recoverer recovers from panics and returns a 500 Internal Server Error.
@@ -13,11 +16,9 @@ func Recoverer(log logger.ILogger) func(next http.Handler) http.Handler {
 			func(w http.ResponseWriter, r *http.Request) {
 				defer func() {
 					if p := recover(); p != nil {
-						log.Error(r.Context(), "[panic]",
-							logger.WithField("detail", p),
-							logger.WithField("stack", string(debug.Stack())),
-						)
-						http.Error(w, "Something went wrong, please try again later", http.StatusInternalServerError)
+						reqCtx := reqctx.GetValue(r.Context())
+						reqCtx.SetError(fmt.Errorf("[panic] %v", p))
+						reqCtx.SetErrorStack(debug.Stack())
 					}
 				}()
 				next.ServeHTTP(w, r)
