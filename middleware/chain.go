@@ -5,16 +5,6 @@ import (
 	"slices"
 )
 
-type HandlerFunc func(http.ResponseWriter, *http.Request) error
-
-func (f HandlerFunc) ServeHTTP(w http.ResponseWriter, r *http.Request) error {
-	return f(w, r)
-}
-
-type Handler interface {
-	ServeHTTP(http.ResponseWriter, *http.Request) error
-}
-
 // Chain is a variadic function that takes a Handler and a list of functions that return a Handler.
 // It returns a Handler that chains the functions together in the order they are provided.
 // The first function in the list is the outermost function, which is applied first.
@@ -22,17 +12,17 @@ type Handler interface {
 //
 // Example:
 //
-//		defaultMiddlewares := []func(next middleware.Handler) middleware.Handler{
-//		middleware.JsonResponse,
-//			middleware.AddRequestId,
-//			middleware.Log,
-//	 }
-//		http.NewServeMux().Handle("/endpoint", middleware.Chain(method, defaultMiddlewares...))
-func Chain(f HandlerFunc, m ...func(Handler) Handler) Handler {
+//	defaultMiddlewares := []func(next http.Handler) http.Handler{
+//	middleware.JsonResponse,
+//		middleware.AddRequestId,
+//		middleware.Log,
+//  }
+//	http.NewServeMux().Handle("/endpoint", middleware.Chain(method, defaultMiddlewares...))
+func Chain(f http.HandlerFunc, m ...func(http.Handler) http.Handler) http.Handler {
 	middlewares := slices.Clone(m)
 	slices.Reverse(middlewares)
 
-	var finalHandler Handler
+	var finalHandler http.Handler
 	for _, candidate := range middlewares {
 		if finalHandler == nil {
 			finalHandler = candidate(f)
@@ -42,5 +32,5 @@ func Chain(f HandlerFunc, m ...func(Handler) Handler) Handler {
 		finalHandler = candidate(finalHandler)
 	}
 	return finalHandler
-
+	
 }
