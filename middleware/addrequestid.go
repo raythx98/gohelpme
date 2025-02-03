@@ -13,14 +13,14 @@ import (
 // This is useful for logging and tracing.
 // It uses the request ID from the API Gateway event if it exists, otherwise it generates a new one
 // and adds it to the request context.
-func AddRequestId(next http.Handler) http.Handler {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
+func AddRequestId(next Handler) Handler {
+	return HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) error {
 			if r.Header.Get(string(httprequest.RequestId)) == "" {
 				r.Header.Set(string(httprequest.RequestId), uuid.NewString())
 			}
 
-			next.ServeHTTP(w, r)
+			return next.ServeHTTP(w, r)
 		},
 	)
 }
