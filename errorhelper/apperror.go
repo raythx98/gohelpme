@@ -2,6 +2,7 @@ package errorhelper
 
 import "fmt"
 
+// AppError are analogous to caught/known exceptions
 type AppError struct {
 	code    int
 	message string
