@@ -1,8 +1,8 @@
 package errorhelper
 
 type ErrorResponse struct {
-	Message string      `json:"message"`
-	Code    int         `json:"code"`
+	Message string      `json:"Message"`
+	Code    int         `json:"Code"`
 	Data    interface{} `json:"data,omitempty"`
 }
 

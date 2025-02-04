@@ -19,11 +19,17 @@ func ErrorHandler(next http.Handler) http.Handler {
 
 			if err := reqctx.GetValue(r.Context()).Error; err != nil {
 				var appError *errorhelper.AppError
-				if errors.Is(err, appError) {
+				if errors.As(err, &appError) {
 					HandleAppError(w, appError)
 					return
 				}
 
+				var authError *errorhelper.AuthError
+				if errors.As(err, &authError) {
+					HandleAuthError(w, authError)
+					return
+				}
+				
 				var invalidValidationErr *validator.InvalidValidationError
 				if errors.As(err, &invalidValidationErr) {
 					HandleInvalidValidationError(w, invalidValidationErr)
@@ -44,8 +50,8 @@ func ErrorHandler(next http.Handler) http.Handler {
 
 func HandleAppError(w http.ResponseWriter, appError *errorhelper.AppError) {
 	marshal, err := json.Marshal(&errorhelper.ErrorResponse{
-		Message: appError.Message(),
-		Code:    appError.Code(),
+		Message: appError.Message,
+		Code:    appError.Code,
 		Data:    appError.Error(),
 	})
 	if err != nil {
@@ -54,6 +60,21 @@ func HandleAppError(w http.ResponseWriter, appError *errorhelper.AppError) {
 	}
 
 	w.WriteHeader(http.StatusBadRequest)
+	_, _ = w.Write(marshal)
+}
+
+func HandleAuthError(w http.ResponseWriter, appError *errorhelper.AuthError) {
+	marshal, err := json.Marshal(&errorhelper.ErrorResponse{
+		Message: "Unauthorized",
+		Code:    404,
+		Data:    appError.Error(),
+	})
+	if err != nil {
+		HandleInternalServerError(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusUnauthorized)
 	_, _ = w.Write(marshal)
 }
 
