@@ -18,73 +18,71 @@ const (
 	Basic   AuthType = "basic"
 )
 
-func Auth(authType AuthType) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(
-			func(w http.ResponseWriter, r *http.Request) {
-				reqCtx := reqctx.GetValue(r.Context())
-				if authType == Access {
-					token, err := request.BearerExtractor{}.ExtractToken(r)
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: err})
-						return
-					}
-
-					jwtToken, err := jwt.GetValidAccessToken(token)
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid access token")})
-						return
-					}
-
-					subject, err := jwtToken.Claims.GetSubject()
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid subject")})
-						return
-					}
-
-					parseInt, err := strconv.ParseInt(subject, 10, 64)
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("failed to parse subject")})
-						return
-					}
-
-					reqCtx.SetUserId(parseInt)
+func Auth(authType AuthType) func(http.HandlerFunc) http.HandlerFunc {
+	return func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			reqCtx := reqctx.GetValue(r.Context())
+			if authType == Access {
+				token, err := request.BearerExtractor{}.ExtractToken(r)
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: err})
+					return
 				}
 
-				if authType == Refresh {
-					token, err := request.BearerExtractor{}.ExtractToken(r)
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: err})
-						return
-					}
-
-					jwtToken, err := jwt.GetValidRefreshToken(token)
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid refresh token")})
-						return
-					}
-
-					subject, err := jwtToken.Claims.GetSubject()
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid subject")})
-						return
-					}
-
-					parseInt, err := strconv.ParseInt(subject, 10, 64)
-					if err != nil {
-						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("failed to parse subject")})
-						return
-					}
-
-					reqCtx.SetUserId(parseInt)
+				jwtToken, err := jwt.GetValidAccessToken(token)
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid access token")})
+					return
 				}
 
-				if authType == Basic {
-					// Pass
+				subject, err := jwtToken.Claims.GetSubject()
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid subject")})
+					return
 				}
 
-				next.ServeHTTP(w, r)
-			},
-		)
+				parseInt, err := strconv.ParseInt(subject, 10, 64)
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("failed to parse subject")})
+					return
+				}
+
+				reqCtx.SetUserId(parseInt)
+			}
+
+			if authType == Refresh {
+				token, err := request.BearerExtractor{}.ExtractToken(r)
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: err})
+					return
+				}
+
+				jwtToken, err := jwt.GetValidRefreshToken(token)
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid refresh token")})
+					return
+				}
+
+				subject, err := jwtToken.Claims.GetSubject()
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid subject")})
+					return
+				}
+
+				parseInt, err := strconv.ParseInt(subject, 10, 64)
+				if err != nil {
+					reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("failed to parse subject")})
+					return
+				}
+
+				reqCtx.SetUserId(parseInt)
+			}
+
+			if authType == Basic {
+				// Pass
+			}
+
+			next.ServeHTTP(w, r)
+		}
 	}
 }

@@ -12,17 +12,17 @@ import (
 //
 // Example:
 //
-//	defaultMiddlewares := []func(next http.Handler) http.Handler{
-//	middleware.JsonResponse,
-//		middleware.AddRequestId,
-//		middleware.Log,
-//  }
-//	http.NewServeMux().Handle("/endpoint", middleware.Chain(method, defaultMiddlewares...))
-func Chain(f http.HandlerFunc, m ...func(http.Handler) http.Handler) http.Handler {
+//		defaultMiddlewares := []func(next http.Handler) http.Handler{
+//		middleware.JsonResponse,
+//			middleware.AddRequestId,
+//			middleware.Log,
+//	 }
+//		http.NewServeMux().Handle("/endpoint", middleware.Chain(method, defaultMiddlewares...))
+func Chain(f http.HandlerFunc, m ...func(http.HandlerFunc) http.HandlerFunc) http.HandlerFunc {
 	middlewares := slices.Clone(m)
 	slices.Reverse(middlewares)
 
-	var finalHandler http.Handler
+	var finalHandler http.HandlerFunc
 	for _, candidate := range middlewares {
 		if finalHandler == nil {
 			finalHandler = candidate(f)
@@ -32,5 +32,5 @@ func Chain(f http.HandlerFunc, m ...func(http.Handler) http.Handler) http.Handle
 		finalHandler = candidate(finalHandler)
 	}
 	return finalHandler
-	
+
 }

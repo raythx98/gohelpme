@@ -12,40 +12,38 @@ import (
 )
 
 // ErrorHandler handles errors and returns the appropriate response.
-func ErrorHandler(next http.Handler) http.Handler {
-	return http.HandlerFunc(
-		func(w http.ResponseWriter, r *http.Request) {
-			next.ServeHTTP(w, r)
+func ErrorHandler(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
 
-			if err := reqctx.GetValue(r.Context()).Error; err != nil {
-				var appError *errorhelper.AppError
-				if errors.As(err, &appError) {
-					HandleAppError(w, appError)
-					return
-				}
-
-				var authError *errorhelper.AuthError
-				if errors.As(err, &authError) {
-					HandleAuthError(w, authError)
-					return
-				}
-				
-				var invalidValidationErr *validator.InvalidValidationError
-				if errors.As(err, &invalidValidationErr) {
-					HandleInvalidValidationError(w, invalidValidationErr)
-					return
-				}
-
-				var validationErr validator.ValidationErrors
-				if errors.As(err, &validationErr) {
-					HandleValidationError(w, validationErr)
-					return
-				}
-
-				HandleInternalServerError(w, err)
+		if err := reqctx.GetValue(r.Context()).Error; err != nil {
+			var appError *errorhelper.AppError
+			if errors.As(err, &appError) {
+				HandleAppError(w, appError)
+				return
 			}
-		},
-	)
+
+			var authError *errorhelper.AuthError
+			if errors.As(err, &authError) {
+				HandleAuthError(w, authError)
+				return
+			}
+
+			var invalidValidationErr *validator.InvalidValidationError
+			if errors.As(err, &invalidValidationErr) {
+				HandleInvalidValidationError(w, invalidValidationErr)
+				return
+			}
+
+			var validationErr validator.ValidationErrors
+			if errors.As(err, &validationErr) {
+				HandleValidationError(w, validationErr)
+				return
+			}
+
+			HandleInternalServerError(w, err)
+		}
+	}
 }
 
 func HandleAppError(w http.ResponseWriter, appError *errorhelper.AppError) {
