@@ -11,12 +11,12 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewAccessToken() (string, error) {
+func NewAccessToken(subject string) (string, error) {
 	claims := &CustomClaims{
 		TokenType: "access",
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "raythx98@gmail.com",
-			Subject:   "user",
+			Subject:   subject,
 			Audience:  []string{"raythx98@gmail.com"},
 			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(1 * time.Minute)},
 			NotBefore: &jwt.NumericDate{Time: time.Now()},
@@ -37,12 +37,12 @@ func NewAccessToken() (string, error) {
 	return tokenString, nil
 }
 
-func NewRefreshToken() (string, error) {
+func NewRefreshToken(subject string) (string, error) {
 	claims := &CustomClaims{
 		TokenType: "refresh",
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "raythx98@gmail.com",
-			Subject:   "user",
+			Subject:   subject,
 			Audience:  []string{"raythx98@gmail.com"},
 			ExpiresAt: &jwt.NumericDate{Time: time.Now().Add(10 * time.Minute)},
 			NotBefore: &jwt.NumericDate{Time: time.Now()},
@@ -89,6 +89,32 @@ func IsValidAccessToken(bearerAuthToken string) error {
 	}
 }
 
+func GetValidAccessToken(bearerAuthToken string) (*jwt.Token, error) {
+	hmacSecret := []byte("secret")
+
+	// Parse and verify the JWT token using the secret key and multiple issuers from _commonSecrets
+	var token *jwt.Token
+	token, err := jwt.ParseWithClaims(
+		bearerAuthToken,
+		&CustomClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return hmacSecret, nil
+		},
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithIssuer("raythx98@gmail.com"))
+	if err != nil {
+		//s.BaseService.Logger.Debug("filterValidBearerAuthTokens: invalid token",
+		//	zap.Error(err), zap.String("token", bearerAuthToken))
+		return nil, fmt.Errorf("cannot parse token: %v", err)
+	}
+
+	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid && claims.TokenType == "access" {
+		return token, nil
+	} else {
+		return nil, fmt.Errorf("invalid token")
+	}
+}
+
 func IsValidRefreshToken(bearerAuthToken string) error {
 	hmacSecret := []byte("secret")
 
@@ -112,5 +138,31 @@ func IsValidRefreshToken(bearerAuthToken string) error {
 		return nil
 	} else {
 		return fmt.Errorf("invalid token")
+	}
+}
+
+func GetValidRefreshToken(bearerAuthToken string) (*jwt.Token, error) {
+	hmacSecret := []byte("secret")
+
+	// Parse and verify the JWT token using the secret key and multiple issuers from _commonSecrets
+	var token *jwt.Token
+	token, err := jwt.ParseWithClaims(
+		bearerAuthToken,
+		&CustomClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return hmacSecret, nil
+		},
+		jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}),
+		jwt.WithIssuer("raythx98@gmail.com"))
+	if err != nil {
+		//s.BaseService.Logger.Debug("filterValidBearerAuthTokens: invalid token",
+		//	zap.Error(err), zap.String("token", bearerAuthToken))
+		return nil, fmt.Errorf("cannot parse token: %v", err)
+	}
+
+	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid && claims.TokenType == "refresh" {
+		return token, nil
+	} else {
+		return nil, fmt.Errorf("invalid token")
 	}
 }

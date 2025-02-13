@@ -7,6 +7,7 @@ import (
 	"github.com/raythx98/gohelpme/tool/jwt"
 	"github.com/raythx98/gohelpme/tool/reqctx"
 	"net/http"
+	"strconv"
 )
 
 type AuthType string
@@ -29,10 +30,25 @@ func Auth(authType AuthType) func(http.Handler) http.Handler {
 						return
 					}
 
-					if jwt.IsValidAccessToken(token) != nil {
+					jwtToken, err := jwt.GetValidAccessToken(token)
+					if err != nil {
 						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid access token")})
 						return
 					}
+
+					subject, err := jwtToken.Claims.GetSubject()
+					if err != nil {
+						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid subject")})
+						return
+					}
+
+					parseInt, err := strconv.ParseInt(subject, 10, 64)
+					if err != nil {
+						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("failed to parse subject")})
+						return
+					}
+
+					reqCtx.SetUserId(parseInt)
 				}
 
 				if authType == Refresh {
@@ -42,10 +58,25 @@ func Auth(authType AuthType) func(http.Handler) http.Handler {
 						return
 					}
 
-					if jwt.IsValidRefreshToken(token) != nil {
+					jwtToken, err := jwt.GetValidRefreshToken(token)
+					if err != nil {
 						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid refresh token")})
 						return
 					}
+
+					subject, err := jwtToken.Claims.GetSubject()
+					if err != nil {
+						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("invalid subject")})
+						return
+					}
+
+					parseInt, err := strconv.ParseInt(subject, 10, 64)
+					if err != nil {
+						reqCtx.SetError(&errorhelper.AuthError{Err: fmt.Errorf("failed to parse subject")})
+						return
+					}
+
+					reqCtx.SetUserId(parseInt)
 				}
 
 				if authType == Basic {
