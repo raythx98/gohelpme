@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/raythx98/gohelpme/tool/logger"
 	"github.com/raythx98/gohelpme/tool/reqctx"
 )
 
 // Recoverer recovers from panics and returns a 500 Internal Server Error.
-func Recoverer(log logger.ILogger) func(next http.HandlerFunc) http.HandlerFunc {
+func Recoverer() func(next http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			defer func() {

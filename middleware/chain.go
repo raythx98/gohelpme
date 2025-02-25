@@ -32,5 +32,4 @@ func Chain(f http.HandlerFunc, m ...func(http.HandlerFunc) http.HandlerFunc) htt
 		finalHandler = candidate(finalHandler)
 	}
 	return finalHandler
-
 }

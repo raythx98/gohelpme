@@ -9,6 +9,15 @@ type AppError struct {
 	err     error
 }
 
+// NewAppError creates a new AppError
+func NewAppError(code int, message string, err error) *AppError {
+	return &AppError{
+		Code:    code,
+		Message: message,
+		err:     err,
+	}
+}
+
 func (e *AppError) Error() string {
 	return fmt.Sprintf("Message: %s, Code: %d, Err: %v", e.Message, e.Code, e.err)
 }
