@@ -1,6 +1,8 @@
 package validator
 
 import (
+	"context"
+
 	"github.com/go-playground/validator/v10"
 )
 
@@ -19,6 +21,6 @@ func (v *GoValidator) GetInstance() any {
 	return v.validate
 }
 
-func (v *GoValidator) StructCtx(ctx, s any) error {
-	return v.StructCtx(ctx, s)
+func (v *GoValidator) StructCtx(ctx context.Context, s any) error {
+	return v.validate.StructCtx(ctx, s)
 }

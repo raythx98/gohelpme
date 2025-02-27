@@ -14,23 +14,12 @@ import (
 func JwtSubject(jwtHelper jwthelper.IJwt) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			var err error
-			reqCtx := reqctx.GetValue(r.Context())
-			defer func() {
-				reqCtx.SetError(err)
-			}()
 
-			subject, err := jwtHelper.GetSubject(r)
-			if err != nil {
-				return
+			if subjectString, err := jwtHelper.GetSubject(r); err == nil {
+				if subject, err := strconv.ParseInt(subjectString, 10, 64); err == nil {
+					reqctx.GetValue(r.Context()).SetUserId(subject)
+				}
 			}
-
-			parseInt, err := strconv.ParseInt(subject, 10, 64)
-			if err != nil {
-				return
-			}
-
-			reqCtx.SetUserId(parseInt)
 
 			next.ServeHTTP(w, r)
 		}

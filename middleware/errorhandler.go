@@ -77,7 +77,7 @@ func HandleAuthError(w http.ResponseWriter, appError *errorhelper.AuthError) {
 }
 
 func HandleInvalidValidationError(w http.ResponseWriter, validationErr *validator.InvalidValidationError) {
-	marshal, err := json.Marshal(errorhelper.NewValidationError(validationErr))
+	marshal, err := json.Marshal(errorhelper.NewValidationError(nil, validationErr))
 	if err != nil {
 		HandleInternalServerError(w, err)
 		return
@@ -88,7 +88,8 @@ func HandleInvalidValidationError(w http.ResponseWriter, validationErr *validato
 }
 
 func HandleValidationError(w http.ResponseWriter, validationErr validator.ValidationErrors) {
-	marshal, err := json.Marshal(errorhelper.NewValidationError(validationErr))
+
+	marshal, err := json.Marshal(errorhelper.NewValidationError(validationErr, validationErr))
 	if err != nil {
 		HandleInternalServerError(w, err)
 		return

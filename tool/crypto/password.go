@@ -19,14 +19,14 @@ type Password struct {
 	keyLength   uint32
 }
 
-func New() *Password {
+func New(config Config) *Password {
 	// Establish the parameters to use for Argon2.
 	return &Password{
-		memory:      64 * 1024,
-		iterations:  3,
-		parallelism: 2,
-		saltLength:  16,
-		keyLength:   32,
+		memory:      config.Memory,
+		iterations:  config.Iterations,
+		parallelism: config.Parallelism,
+		saltLength:  config.SaltLength,
+		keyLength:   config.KeyLength,
 	}
 }
 

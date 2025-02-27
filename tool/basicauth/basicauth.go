@@ -15,9 +15,9 @@ type Auth struct {
 // New creates a new Auth instance.
 func New(configProvider ConfigProvider) *Auth {
 	return &Auth{
-		expectedToken: fmt.Sprintf("%s:%s",
-			base64.StdEncoding.EncodeToString(configProvider.GetBasicAuthUsername()),
-			base64.StdEncoding.EncodeToString(configProvider.GetBasicAuthPassword())),
+		expectedToken: base64.StdEncoding.EncodeToString(
+			[]byte(fmt.Sprintf("%s:%s",
+				string(configProvider.GetBasicAuthUsername()), string(configProvider.GetBasicAuthPassword())))),
 	}
 }
 
