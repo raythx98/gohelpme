@@ -7,8 +7,8 @@ type IAuth interface {
 	Authenticate(req *http.Request) error
 }
 
-// SecretProvider is the interface that wraps the GetBasicAuthUsername and GetBasicAuthPassword methods.
-type SecretProvider interface {
+// ConfigProvider is the interface that wraps the GetBasicAuthUsername and GetBasicAuthPassword methods.
+type ConfigProvider interface {
 	GetBasicAuthUsername() []byte
 	GetBasicAuthPassword() []byte
 }

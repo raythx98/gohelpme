@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// SecretProvider is the interface for providing the HMAC secret.
-type SecretProvider interface {
+// ConfigProvider is the interface for providing the HMAC secret.
+type ConfigProvider interface {
 	GetHmacSecret() []byte
 }
 

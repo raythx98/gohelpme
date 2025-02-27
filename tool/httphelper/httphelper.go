@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/validator/v10"
+	"github.com/raythx98/gohelpme/tool/validator"
 	"io"
 	"net/http"
 )
@@ -45,7 +45,7 @@ func CopyResponseBody(resp *http.Response) string {
 // GetRequestBodyAndValidate reads the request body and validates it.
 //
 // It returns the request body and an error if any.
-func GetRequestBodyAndValidate[T any](_ context.Context, r *http.Request, v *validator.Validate) (T, error) {
+func GetRequestBodyAndValidate[T any](ctx context.Context, r *http.Request, v validator.IValidator) (T, error) {
 	var body T
 	requestByte, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -54,9 +54,9 @@ func GetRequestBodyAndValidate[T any](_ context.Context, r *http.Request, v *val
 	if err := json.Unmarshal(requestByte, &body); err != nil {
 		return body, fmt.Errorf("failed to unmarshal request body: %w", err)
 	}
-	if err := v.Struct(body); err != nil {
+	
+	if err := v.StructCtx(ctx, body); err != nil {
 		return body, fmt.Errorf("validation failed: %w", err)
 	}
-
 	return body, nil
 }

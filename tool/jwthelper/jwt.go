@@ -25,9 +25,9 @@ type IJwt interface {
 }
 
 // New creates a new Jwt instance.
-func New(config Config, secretProvider SecretProvider) *Jwt {
+func New(config Config, configProvider ConfigProvider) *Jwt {
 	return &Jwt{
-		hmacSecret:           secretProvider.GetHmacSecret(),
+		hmacSecret:           configProvider.GetHmacSecret(),
 		issuer:               config.Issuer,
 		audiences:            config.Audiences,
 		accessTokenValidity:  config.AccessTokenValidity,
