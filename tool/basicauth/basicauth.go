@@ -21,8 +21,7 @@ func New(configProvider ConfigProvider) *Auth {
 			string(configProvider.GetBasicAuthUsername()), string(configProvider.GetBasicAuthPassword())))))
 	return &Auth{
 		expectedToken: base64.StdEncoding.EncodeToString(
-			[]byte(fmt.Sprintf("%s:%s",
-				string(configProvider.GetBasicAuthUsername()), string(configProvider.GetBasicAuthPassword())))),
+			[]byte(fmt.Sprintf("%s:%s", configProvider.GetBasicAuthUsername(), configProvider.GetBasicAuthPassword()))),
 	}
 }
 

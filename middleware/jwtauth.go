@@ -25,9 +25,10 @@ func JwtAuth(jwtHelper jwthelper.IJwt, authType AuthType) func(http.HandlerFunc)
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			var err error
-			reqCtx := reqctx.GetValue(r.Context())
 			defer func() {
-				reqCtx.SetError(errorhelper.NewAuthError(err))
+				if err != nil {
+					reqctx.GetValue(r.Context()).SetError(errorhelper.NewAuthError(err))
+				}
 			}()
 
 			switch authType {
