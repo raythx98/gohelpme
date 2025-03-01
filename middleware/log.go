@@ -2,14 +2,12 @@ package middleware
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/raythx98/gohelpme/builder/httprequest"
 	"github.com/raythx98/gohelpme/tool/httphelper"
 	"github.com/raythx98/gohelpme/tool/logger"
 	"github.com/raythx98/gohelpme/tool/reqctx"
@@ -45,8 +43,6 @@ func Log(log logger.ILogger) func(next http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			startAt := time.Now()
-			ctx := context.WithValue(r.Context(), reqctx.Key, reqctx.New(r.Header.Get(string(httprequest.RequestId))))
-			r = r.WithContext(ctx)
 
 			// capture request body
 			requestBody, _ := io.ReadAll(r.Body)
