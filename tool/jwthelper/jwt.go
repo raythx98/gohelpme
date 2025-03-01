@@ -92,22 +92,15 @@ func (j *Jwt) GetSubject(r *http.Request) (string, error) {
 		return "", err
 	}
 
-	fmt.Println("bearerToken", bearerToken)
-
 	token, err := j.Parse(bearerToken)
 	if err != nil {
 		return "", fmt.Errorf("cannot parse token: %v", err)
 	}
 
-	fmt.Println("token", token)
-
 	claims, ok := token.Claims.(*CustomClaims)
 	if !ok {
 		return "", fmt.Errorf("cannot parse claims")
 	}
-
-	val, err := claims.RegisteredClaims.GetSubject()
-	fmt.Println("claims", val, err)
 
 	return claims.RegisteredClaims.GetSubject()
 }
