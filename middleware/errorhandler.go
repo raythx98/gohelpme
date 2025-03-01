@@ -64,7 +64,7 @@ func HandleAppError(w http.ResponseWriter, appError *errorhelper.AppError) {
 func HandleAuthError(w http.ResponseWriter, appError *errorhelper.AuthError) {
 	marshal, err := json.Marshal(&errorhelper.ErrorResponse{
 		Message: "Unauthorized",
-		Code:    404,
+		Code:    401,
 		Data:    appError.Error(),
 	})
 	if err != nil {
