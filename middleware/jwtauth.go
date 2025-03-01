@@ -59,7 +59,7 @@ func AuthenticateAccessToken(r *http.Request, jwtHelper jwthelper.IJwt) error {
 }
 
 func AuthenticateRefreshToken(r *http.Request, jwtHelper jwthelper.IJwt) error {
-	if err := jwtHelper.Authenticate(r, jwthelper.AccessToken); err != nil {
+	if err := jwtHelper.Authenticate(r, jwthelper.RefreshToken); err != nil {
 		return fmt.Errorf("%v, invalid refresh token", err)
 	}
 

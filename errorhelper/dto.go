@@ -3,8 +3,8 @@ package errorhelper
 import "github.com/go-playground/validator/v10"
 
 type ErrorResponse struct {
-	Message string      `json:"Message"`
-	Code    int         `json:"Code"`
+	Message string      `json:"message"`
+	Code    int         `json:"code"`
 	Data    interface{} `json:"data,omitempty"`
 }
 
