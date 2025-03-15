@@ -8,10 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-type IS3 interface {
-	Upload(ctx context.Context, bucketName string, fileName string, fileBytes []byte, contentType string) error
-}
-
 type S3 struct {
 	client *s3.Client
 }
