@@ -11,7 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewPool(ctx context.Context, cfg ConfigProvider, log logger.ILogger) *pgxpool.Pool {
+type Postgres struct {
+	pool *pgxpool.Pool
+}
+
+func New(ctx context.Context, cfg ConfigProvider, log logger.ILogger) *Postgres {
 	connString := fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s sslmode=disable pool_max_conns=10",
 		cfg.GetDbUsername(), cfg.GetDbPassword(), cfg.GetDbHost(), cfg.GetDbPort(), cfg.GetDbDefaultName())
 	config, err := pgxpool.ParseConfig(connString)
@@ -37,5 +41,9 @@ func NewPool(ctx context.Context, cfg ConfigProvider, log logger.ILogger) *pgxpo
 		os.Exit(1)
 	}
 
-	return pool
+	return &Postgres{pool: pool}
+}
+
+func (p *Postgres) Pool() *pgxpool.Pool {
+	return p.pool
 }
