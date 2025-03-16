@@ -1,7 +1,6 @@
 package errorhelper
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -22,11 +21,5 @@ func NewAppError(code int, message string, err error) *AppError {
 }
 
 func (e *AppError) Error() string {
-	return fmt.Sprintf("Message: %s, Code: %d, Err: %v", e.Message, e.Code, e.err)
-}
-
-func (e *AppError) Is(target error) bool {
-	var targetAppError *AppError
-	ok := errors.As(target, &targetAppError)
-	return ok && targetAppError.Code == e.Code && targetAppError.Message == e.Message
+	return fmt.Sprintf("App Error, Message: %s, Code: %d, Err: %v", e.Message, e.Code, e.err)
 }
