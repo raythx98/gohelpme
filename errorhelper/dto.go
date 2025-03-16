@@ -39,6 +39,8 @@ func validationMsg(fe validator.FieldError) string {
 		return fe.Field() + " is required"
 	case "email":
 		return "Invalid email"
+	case "alphanum":
+		return fe.Field() + " should only contain letters and numbers"
 	case "min":
 		return fe.Field() + " should at least have " + fe.Param() + " characters"
 	case "max":
