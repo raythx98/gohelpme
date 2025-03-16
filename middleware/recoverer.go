@@ -14,9 +14,9 @@ func Recoverer() func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if p := recover(); p != nil {
-					reqCtx := reqctx.GetValue(r.Context())
-					reqCtx.SetError(fmt.Errorf("[panic] %v", p))
-					reqCtx.SetErrorStack(debug.Stack())
+					reqctx.GetValue(r.Context()).
+						SetError(fmt.Errorf("[panic] %v", p)).
+						SetErrorStack(debug.Stack())
 				}
 			}()
 			next.ServeHTTP(w, r)

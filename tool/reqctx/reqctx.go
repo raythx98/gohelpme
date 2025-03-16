@@ -49,35 +49,39 @@ func New(requestId string) *Value {
 }
 
 // SetUserId modifies UserId of Value in place.
-func (v *Value) SetUserId(userId int64) {
+func (v *Value) SetUserId(userId int64) *Value {
 	if v == nil {
-		return
+		return v
 	}
 	v.UserId = &userId
+	return v
 }
 
 // SetIdempotencyKey modifies IdempotencyKey of Value in place.
-func (v *Value) SetIdempotencyKey(idemKey string) {
+func (v *Value) SetIdempotencyKey(idemKey string) *Value {
 	if v == nil {
-		return
+		return v
 	}
 	v.IdempotencyKey = &idemKey
+	return v
 }
 
 // SetError modifies Error of Value in place.
-func (v *Value) SetError(error error) {
+func (v *Value) SetError(error error) *Value {
 	if v == nil {
-		return
+		return v
 	}
 	v.Error = error
+	return v
 }
 
 // SetErrorStack modifies ErrorStack of Value in place.
-func (v *Value) SetErrorStack(errorStack []byte) {
+func (v *Value) SetErrorStack(errorStack []byte) *Value {
 	if v == nil {
-		return
+		return v
 	}
 	v.ErrorStack = string(errorStack)
+	return v
 }
 
 // GetValue retrieves a pointer to Value.
