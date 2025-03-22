@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"github.com/raythx98/gohelpme/tool/basicauth"
 	"net/http"
 
 	"github.com/raythx98/gohelpme/errorhelper"
+	"github.com/raythx98/gohelpme/tool/basicauth"
 	"github.com/raythx98/gohelpme/tool/reqctx"
 )
 
