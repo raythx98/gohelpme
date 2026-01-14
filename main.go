@@ -17,9 +17,15 @@ func main() {
 	// type to make use of our middleware
 	mux := http.NewServeMux()
 
+	l := logger.NewDefault()
+	opt := middleware.LogOptions{
+		RequestRedact:  []string{"body.variables.password"},
+		ResponseRedact: []string{"body.data.login.token"},
+	}
+
 	finalHandler := http.HandlerFunc(handler)
-	mux.Handle("/", middleware.JsonResponse(middleware.AddRequestId(middleware.Log(finalHandler))))
-	mux.Handle("/test", middleware.Log(finalHandler))
+	mux.Handle("/", middleware.JsonResponse(middleware.AddRequestId(middleware.Log(l, opt)(finalHandler))))
+	mux.Handle("/test", middleware.Log(l)(finalHandler))
 
 	err := http.ListenAndServe(":3000", mux)
 	log.Fatal(err)
