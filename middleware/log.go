@@ -19,27 +19,22 @@ type responseBodyWriter struct {
 	statusCode int
 }
 
-// Write writes the response body to the underlying ResponseWriter.
-//
-// It also captures the response body for logging.
-// This method satisfies the http.ResponseWriter interface.
 func (w *responseBodyWriter) Write(body []byte) (int, error) {
 	w.body = body
 	return w.ResponseWriter.Write(body)
 }
 
-// WriteHeader writes the response status code to the underlying ResponseWriter.
-//
-// It also captures the response status code for logging.
-// This method satisfies the http.ResponseWriter interface.
 func (w *responseBodyWriter) WriteHeader(statusCode int) {
 	w.statusCode = statusCode
 	w.ResponseWriter.WriteHeader(statusCode)
 }
 
+type LogConfig struct {
+	RedactedPaths []string
+}
+
 // Log is a middleware that logs the request and response to the logger.
-// It also logs some metadata about the request, such as the request ID, source IP, and execution time.
-func Log(log logger.ILogger) func(next http.HandlerFunc) http.HandlerFunc {
+func Log(log logger.ILogger, cfg LogConfig) func(next http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			startAt := time.Now()
@@ -71,15 +66,18 @@ func Log(log logger.ILogger) func(next http.HandlerFunc) http.HandlerFunc {
 				},
 			}
 
+			// redact sensitive information
+			redactedLogs := redact(logs, cfg.RedactedPaths)
+
 			if reqctx.GetValue(r.Context()).Error != nil {
 				log.Error(r.Context(), fmt.Sprintf("[in-http] %s %s%s %d in %s",
 					r.Method, r.Host, r.RequestURI, respWriter.statusCode, timeTaken),
-					logger.WithFields(logs),
+					logger.WithFields(redactedLogs),
 				)
 			} else {
 				log.Info(r.Context(), fmt.Sprintf("[in-http] %s %s%s %d in %s",
 					r.Method, r.Host, r.RequestURI, respWriter.statusCode, timeTaken),
-					logger.WithFields(logs),
+					logger.WithFields(redactedLogs),
 				)
 			}
 		}

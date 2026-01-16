@@ -18,8 +18,8 @@ func main() {
 	mux := http.NewServeMux()
 
 	finalHandler := http.HandlerFunc(handler)
-	mux.Handle("/", middleware.JsonResponse(middleware.AddRequestId(middleware.Log(finalHandler))))
-	mux.Handle("/test", middleware.Log(finalHandler))
+	mux.Handle("/", middleware.JsonResponse(middleware.AddRequestId(middleware.Log(logger.NewDefault(), middleware.LogConfig{})(finalHandler)))))
+	mux.Handle("/test", middleware.Log(logger.NewDefault(), middleware.LogConfig{})(finalHandler))
 
 	err := http.ListenAndServe(":3000", mux)
 	log.Fatal(err)
